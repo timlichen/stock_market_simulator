@@ -12,6 +12,61 @@
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script type="text/javascript">
     $(document).ready(function(){
+
+      function calculate_10_day_sma(dates, closing_price){
+
+        var sma_dates = dates.slice(10)
+        var simple_moving_average = []
+        var count_range_start = 9
+        var count_range_end = 0
+
+        while(count_range_end != closing_price.length){
+          var sum = 0
+          for(var x = count_range_start; x >= count_range_end; x++){
+            if(x === 'undefined'){
+              break;
+            }
+            sum += closing_price[x]
+          }
+          simple_moving_average.push(sum);
+
+          count_range_start++
+          count_range_end++
+        }
+        console.log(simple_moving_average)
+        return simple_moving_average
+      }
+
+      function sortDates(data){
+        var dates = []
+        for(val in data){
+          dates.push(val)
+        }
+        return dates.sort()
+      }
+
+      function stockData(dates, data){
+        var stockDataObj = {
+          "close": [],
+          "volume": [],
+          "open": [],
+          "high": [],
+          "low": []
+        }
+
+        for(var x = 0; x < dates.length; x++){
+          stockDataObj['high'].push(parseInt(data[dates[x]]["High"]))
+          stockDataObj['low'].push(parseInt(data[dates[x]]["Low"]))
+          stockDataObj['close'].push(parseInt(data[dates[x]]["Close"]))
+          stockDataObj['volume'].push(parseInt(data[dates[x]]["Volume"]))
+          stockDataObj['open'].push(parseInt(data[dates[x]]["Open"]))
+
+          $('#test').append("<p>" + dates[x] + " : " + JSON.stringify(data[dates[x]], null, 2)+"</p>")
+        }``
+
+        return stockDataObj;
+      }
+
       $(".datepicker" ).datepicker();
 
       $('form').submit(function(e){
@@ -22,27 +77,16 @@
           method: 'Post',
           data: $(this).serialize(),
           success: function(data){
-            var keys = []
-            var close = []
-            var volume = []
-            var open = []
-            var high = []
-            var low = []
-            for(val in data){
-              keys.push(val)
-            }
-            keys.sort()
-            for(var x = 0; x < keys.length; x++){
-              high.push(parseInt(data[keys[x]]["High"]))
-              low.push(parseInt(data[keys[x]]["High"]))
-              close.push(parseInt(data[keys[x]]["Close"]))
-              volume.push(parseInt(data[keys[x]]["Volume"]))
-              open.push(parseInt(data[keys[x]]["Open"]))
-              $('#test').append("<p>" + keys[x] + " : " + JSON.stringify(data[keys[x]], null, 2)+"</p>")
-            }
+
+            var dates = sortDates(data)
+            var stockDataObj = stockData(dates, data)
+            var ten_day_sma = calculate_10_day_sma(dates, stockDataObj['close'])
+
+            // BEGIN GRAPH CODE
+
             var trace1 = {
-              x: keys,
-              y: volume,
+              x: stockDataObj['dates'],
+              y: stockDataObj['volume'],
               name: 'Daily Volume Traded',
               type: 'scatter'
             };
@@ -59,21 +103,21 @@
 
             var trace1 = {
 
-              x: keys,
+              x: dates,
 
-              close: close,
+              close: stockDataObj['close'],
 
               decreasing: {line: {color: '#7F7F7F'}},
 
-              high: high,
+              high: stockDataObj['high'],
 
               increasing: {line: {color: '#17BECF'}},
 
               line: {color: 'rgba(31,119,180,1)'},
 
-              low: low,
+              low: stockDataObj['low'],
 
-              open: open,
+              open: stockDataObj['open'],
 
               type: 'ohlc',
               xaxis: 'x',
@@ -93,7 +137,7 @@
               showlegend: false,
               xaxis: {
                 autorange: true,
-                rangeslider: {range: [keys[0], keys[keys.length-1]]},
+                rangeslider: {range: [dates[0], dates[dates.length-1]]},
                 title: 'Date',
                 type: 'date'
               },

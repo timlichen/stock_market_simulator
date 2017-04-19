@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, reverse
 from django.contrib import messages
 from django.utils.safestring import SafeString
+from django.http import JsonResponse
 import ystockquote
-import json
+
 from pprint import pprint
 from datetime import datetime
 
@@ -21,17 +22,9 @@ def posted_historic_stock_data(request):
 
 
     date_end = datetime(int(end[2]), int(end[0]), int(end[1])).strftime('%Y-%m-%d')
-
-
-    historic_stock_data  = ystockquote.get_historical_prices(symbol, date_start, date_end)
-
+    historic_stock_data  = JsonResponse(ystockquote.get_historical_prices(symbol, date_start, date_end))
 
     print type(historic_stock_data)
-    # return historic_stock_data
-    # messages.info(request, historic_stock_data)
-
-    # send data through reverse route, then display
-    # set validations for date
-    context = { "historic_stock_data": SafeString(historic_stock_data)}
-    return render(request, 'stock_market_sim_templates/hist_results.html', context)
-    # return redirect(reverse('stock_market_sim_app:index'))
+    return historic_stock_data
+    # context = { "historic_stock_data": SafeString(historic_stock_data)}
+    # return render(request, 'stock_market_sim_templates/hist_results.html', context)

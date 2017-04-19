@@ -24,7 +24,9 @@ def posted_historic_stock_data(request):
     date_end = datetime(int(end[2]), int(end[0]), int(end[1])).strftime('%Y-%m-%d')
     historic_stock_data  = JsonResponse(ystockquote.get_historical_prices(symbol, date_start, date_end))
 
-    print type(historic_stock_data)
+    print ystockquote.get_200_sma('googl')
+
+
     return historic_stock_data
     # context = { "historic_stock_data": SafeString(historic_stock_data)}
     # return render(request, 'stock_market_sim_templates/hist_results.html', context)

@@ -19,22 +19,29 @@
         var simple_moving_average = []
         var count_range_start = 9
         var count_range_end = 0
-
+        var counter = 0
         while(count_range_end != closing_price.length){
           var sum = 0
-          for(var x = count_range_start; x >= count_range_end; x++){
-            if(x === 'undefined'){
-              break;
+          for(var x = count_range_start; x >= count_range_end; x--){
+            counter++
+            if(closing_price[x] === undefined){
+              var data = [sma_dates, simple_moving_average]
+              return data;
             }
             sum += closing_price[x]
           }
-          simple_moving_average.push(sum);
+          simple_moving_average.push(sum / 10);
 
+          if(counter === 9){
+            counter = 0
+          }
           count_range_start++
           count_range_end++
         }
-        console.log(simple_moving_average)
-        return simple_moving_average
+        var data = [sma_dates, simple_moving_average]
+        return data
+
+
       }
 
       function sortDates(data){
@@ -62,7 +69,7 @@
           stockDataObj['open'].push(parseInt(data[dates[x]]["Open"]))
 
           $('#test').append("<p>" + dates[x] + " : " + JSON.stringify(data[dates[x]], null, 2)+"</p>")
-        }``
+        }
 
         return stockDataObj;
       }
@@ -100,6 +107,21 @@
 
             Plotly.newPlot('myDiv', data, layout);
 
+            var trace1 = {
+              x: ten_day_sma[0],
+              y: ten_day_sma[1],
+              name: '10 day Simple Moving Average',
+              type: 'scatter'
+            };
+
+            var data = [trace1];
+
+            var layout = {
+              title: 'Simple Moving Average',
+              yaxis: {title: 'Simple Moving Average'},
+            };
+
+            Plotly.newPlot('myDiv2', data, layout);
 
             var trace1 = {
 
@@ -169,8 +191,8 @@
         <form action="{% url 'stock_market_sim_app:post_symbol' %}", method="POST">
           {% csrf_token %}
           <p>Stock Symbol: <input type="text" name="symbol" value="googl"></p>
-          <p>Start Date: <input type="text" class="datepicker" value="03/15/2016" name="start"></p>
-          <p>EndDate: <input type="text" class="datepicker" name="end" value="03/15/2017"></p>
+          <p>Start Date: <input type="text" class="datepicker" value="03/15/2017" name="start"></p>
+          <p>EndDate: <input type="text" class="datepicker" name="end" value="03/31/2017"></p>
           <p><input type="submit" value="Go!"></p>
         </form>
         <p id="data">
@@ -181,6 +203,11 @@
           <div id="myDiv" style="width: 100%; height: 600px;">
 
           </div>
+
+          <div id="myDiv2" style="width: 100%; height: 600px;">
+
+          </div>
+
 
           <pre id="test">
 
